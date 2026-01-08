@@ -1,0 +1,5 @@
+{
+  "name": "Kuwait Justice Data Extractor",
+  "description": "An AI-powered tool to extract, analyze, and export legal case data from Ministry of Justice PDF documents using Gemini 2.5 Flash.",
+  "requestFramePermissions": []
+}

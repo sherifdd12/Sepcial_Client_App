@@ -1,0 +1,190 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Professional Arabic Financial App Design System - RTL Optimized
+All colors MUST be HSL for consistency */
+
+@layer base {
+  :root {
+    /* Base colors - Professional Financial Theme */
+    --background: 248 250% 99%;
+    --foreground: 213 27% 15%;
+
+    /* Card and surface colors */
+    --card: 0 0% 100%;
+    --card-foreground: 213 27% 15%;
+
+    /* Popover colors */
+    --popover: 0 0% 100%;
+    --popover-foreground: 213 27% 15%;
+
+    /* Primary - Professional Teal/Blue */
+    --primary: 195 92% 38%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 195 92% 32%;
+
+    /* Secondary - Soft Gray */
+    --secondary: 210 11% 96%;
+    --secondary-foreground: 213 27% 25%;
+
+    /* Muted colors */
+    --muted: 210 11% 96%;
+    --muted-foreground: 213 13% 52%;
+
+    /* Accent - Success Green */
+    --accent: 142 76% 36%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Financial status colors */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --danger: 0 84% 58%;
+    --danger-foreground: 0 0% 100%;
+
+    /* Destructive */
+    --destructive: 0 84% 58%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Borders and inputs */
+    --border: 214 13% 88%;
+    --input: 214 13% 88%;
+    --ring: 195 92% 38%;
+
+    /* Professional gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(195 92% 38%), hsl(195 92% 45%));
+    --gradient-success: linear-gradient(135deg, hsl(142 76% 36%), hsl(142 76% 42%));
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(210 11% 98%));
+
+    /* Shadows for depth */
+    --shadow-card: 0 2px 8px hsl(213 27% 15% / 0.08);
+    --shadow-elevated: 0 8px 32px hsl(213 27% 15% / 0.12);
+    --shadow-primary: 0 4px 16px hsl(195 92% 38% / 0.3);
+
+    /* Border radius */
+    --radius: 0.75rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  /* RTL Support */
+  [dir="rtl"] {
+    text-align: right;
+  }
+
+  /* Arabic Typography */
+  .arabic-font {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-feature-settings: "liga" 1, "kern" 1;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground arabic-font;
+    direction: rtl;
+  }
+
+  /* Professional Financial App Styles */
+  .gradient-primary {
+    background: var(--gradient-primary);
+  }
+
+  .gradient-success {
+    background: var(--gradient-success);
+  }
+
+  .gradient-card {
+    background: var(--gradient-card);
+  }
+
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+
+  .shadow-elevated {
+    box-shadow: var(--shadow-elevated);
+  }
+
+  .shadow-primary {
+    box-shadow: var(--shadow-primary);
+  }
+
+  /* Currency formatting */
+  .currency-kwd::after {
+    content: " د.ك";
+    font-size: 0.875em;
+    opacity: 0.8;
+  }
+
+  /* Status indicators */
+  .status-paid {
+    @apply bg-success/10 text-success border border-success/20;
+  }
+
+  .status-overdue {
+    @apply bg-danger/10 text-danger border border-danger/20;
+  }
+
+  .status-pending {
+    @apply bg-warning/10 text-warning border border-warning/20;
+  }
+}

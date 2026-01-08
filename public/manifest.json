@@ -1,0 +1,22 @@
+{
+    "name": "نظام إدارة الأقساط",
+    "short_name": "الأقساط",
+    "description": "نظام شامل لإدارة المبيعات بالتقسيط والعملاء",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#f8fafc",
+    "theme_color": "#0ea5e9",
+    "orientation": "portrait",
+    "icons": [
+        {
+            "src": "/logo.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/logo.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}

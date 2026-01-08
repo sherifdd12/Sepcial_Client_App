@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kuwait Justice Data Extractor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Tajawal', 'sans-serif'],
+            },
+            colors: {
+              brand: {
+                50: '#f0f9ff',
+                100: '#e0f2fe',
+                500: '#0ea5e9',
+                600: '#0284c7',
+                800: '#075985',
+                900: '#0c4a6e',
+              },
+              gold: {
+                500: '#d4af37',
+                600: '#aa8c2c',
+              }
+            }
+          },
+        },
+      }
+    </script>
+    <!-- PDF.js for rendering PDF to images for Gemini -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        // Configure PDF.js worker safely
+        if (typeof pdfjsLib !== 'undefined') {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        } else {
+            console.error("PDF.js library failed to load.");
+        }
+    </script>
+    <!-- SheetJS for Excel Export -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <!-- html2pdf.js for PDF Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "recharts": "https://aistudiocdn.com/recharts@^3.4.1",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0"
+  }
+}
+</script>
+<style>
+  /* Force page breaks in generated PDF and Print */
+  .pdf-page-break {
+      page-break-after: always;
+      break-after: page;
+      display: block;
+      height: 0;
+      visibility: hidden;
+  }
+
+  /* Styles specifically for the print/PDF container */
+  .a4-landscape-sheet {
+      width: 297mm; /* Exact A4 Landscape width */
+      height: 209mm; /* Exact A4 Landscape height minus tiny margin */
+      margin: 0 auto; /* Center on screen */
+      background: white;
+      padding: 10mm;
+      box-sizing: border-box;
+      page-break-inside: avoid;
+      display: flex;
+      flex-direction: column;
+      color: black; /* Force black text */
+      border: 1px solid #e5e7eb; /* Visual border on screen */
+      margin-bottom: 20px;
+  }
+
+  .a4-portrait-sheet {
+      width: 210mm; /* Exact A4 Portrait width */
+      height: 296mm; /* Exact A4 Portrait height minus tiny margin */
+      margin: 0 auto;
+      background: white;
+      padding: 10mm;
+      box-sizing: border-box;
+      page-break-inside: avoid;
+      display: flex;
+      flex-direction: column;
+      color: black;
+      border: 1px solid #e5e7eb;
+      margin-bottom: 20px;
+  }
+
+  /* Print Media Query */
+  @media print {
+      @page {
+        margin: 0;
+        /* Note: size is often overridden by the user's print dialog, 
+           but we set auto to try and respect the content size */
+        size: auto; 
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: white !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      /* Hide everything by default */
+      body > * {
+        display: none !important;
+      }
+
+      /* Re-show the root app container */
+      #root {
+        display: block !important;
+        width: 100%;
+        height: auto;
+        overflow: visible !important;
+      }
+      
+      /* Hide direct children of root that are NOT the print container */
+      #root > *:not(#print-container-wrapper) {
+        display: none !important;
+      }
+
+      /* Explicitly show and position the wrapper */
+      #print-container-wrapper {
+        display: block !important;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        background: white;
+        visibility: visible !important;
+      }
+
+      /* Sheet styling for print */
+      .a4-landscape-sheet, .a4-portrait-sheet {
+        width: 100%;
+        /* Let height accommodate content, or force page size if strict */
+        height: 100vh; 
+        page-break-after: always;
+        page-break-inside: avoid;
+        margin: 0;
+        border: none !important; /* Remove screen border */
+        box-shadow: none !important;
+      }
+
+      .no-print {
+          display: none !important;
+      }
+  }
+</style>
+</head>
+  <body class="bg-gray-50 text-gray-900">
+    <div id="root"></div>
+  </body>
+</html>
