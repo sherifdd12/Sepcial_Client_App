@@ -367,6 +367,7 @@ END;
 $$;
 
 -- Has role function (for TEXT roles)
+-- This is the main function - user_roles.role is TEXT, not enum
 CREATE OR REPLACE FUNCTION public.has_role(_user_id uuid, _role text)
 RETURNS boolean
 LANGUAGE plpgsql
@@ -387,23 +388,6 @@ BEGIN
   );
 END;
 $function$;
-
--- Has role function (for app_role enum - legacy support)
-CREATE OR REPLACE FUNCTION public.has_role(user_id_to_check UUID, role_to_check public.app_role)
-RETURNS BOOLEAN
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-BEGIN
-    RETURN EXISTS (
-        SELECT 1
-        FROM public.user_roles
-        WHERE user_id = user_id_to_check
-        AND role = role_to_check::text
-    );
-END;
-$$;
 
 -- Has permission function
 CREATE OR REPLACE FUNCTION public.has_permission(user_id UUID, permission_code TEXT)
