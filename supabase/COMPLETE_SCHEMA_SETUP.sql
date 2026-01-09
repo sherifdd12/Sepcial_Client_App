@@ -79,73 +79,8 @@ CREATE TABLE IF NOT EXISTS public.transactions (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Payments Table
-CREATE TABLE IF NOT EXISTS public.payments (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    transaction_id UUID NOT NULL REFERENCES public.transactions(id) ON DELETE CASCADE,
-    customer_id UUID NOT NULL REFERENCES public.customers(id) ON DELETE CASCADE,
-    amount NUMERIC(10,3) NOT NULL,
-    payment_date DATE NOT NULL,
-    balance_before NUMERIC(10,3),
-    balance_after NUMERIC(10,3),
-    penalty_amount NUMERIC(10,3) DEFAULT 0,
-    notes TEXT,
-    payment_method TEXT DEFAULT 'other' CHECK (payment_method IN ('tap', 'other', 'court_collection', 'cash', 'bank_transfer')),
-    tap_charge_id TEXT,
-    legal_case_id UUID REFERENCES public.legal_cases(id) ON DELETE SET NULL,
-    legal_fee_id UUID REFERENCES public.legal_fees(id) ON DELETE SET NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
--- Document Attachments Table
-CREATE TABLE IF NOT EXISTS public.document_attachments (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    transaction_id UUID REFERENCES public.transactions(id) ON DELETE CASCADE,
-    customer_id UUID REFERENCES public.customers(id) ON DELETE CASCADE,
-    file_name TEXT NOT NULL,
-    file_path TEXT NOT NULL,
-    file_type TEXT,
-    file_size BIGINT,
-    description TEXT,
-    bucket_name TEXT DEFAULT 'documents',
-    created_at TIMESTAMPTZ DEFAULT now() NOT NULL
-);
-
 -- =================================================================
--- PART 4: RBAC System Tables
--- =================================================================
-
--- Permissions Table
-CREATE TABLE IF NOT EXISTS public.permissions (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    code TEXT NOT NULL UNIQUE,
-    name TEXT NOT NULL,
-    module TEXT NOT NULL,
-    description TEXT,
-    created_at TIMESTAMPTZ DEFAULT now()
-);
-
--- App Roles Table (Dynamic Roles)
-CREATE TABLE IF NOT EXISTS public.app_roles (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name TEXT NOT NULL UNIQUE,
-    description TEXT,
-    is_system_role BOOLEAN DEFAULT false,
-    created_at TIMESTAMPTZ DEFAULT now(),
-    updated_at TIMESTAMPTZ DEFAULT now()
-);
-
--- Role Permissions Table (Many-to-Many)
-CREATE TABLE IF NOT EXISTS public.role_permissions (
-    role_id UUID REFERENCES public.app_roles(id) ON DELETE CASCADE,
-    permission_id UUID REFERENCES public.permissions(id) ON DELETE CASCADE,
-    created_at TIMESTAMPTZ DEFAULT now(),
-    PRIMARY KEY (role_id, permission_id)
-);
-
--- =================================================================
--- PART 5: Legal System Tables
+-- PART 4: Legal System Tables (Must be created before payments)
 -- =================================================================
 
 -- Legal Cases Table
@@ -179,6 +114,71 @@ CREATE TABLE IF NOT EXISTS public.legal_fees (
     updated_at TIMESTAMPTZ DEFAULT now()
 );
 
+-- Payments Table (Now legal_cases and legal_fees exist)
+CREATE TABLE IF NOT EXISTS public.payments (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    transaction_id UUID NOT NULL REFERENCES public.transactions(id) ON DELETE CASCADE,
+    customer_id UUID NOT NULL REFERENCES public.customers(id) ON DELETE CASCADE,
+    amount NUMERIC(10,3) NOT NULL,
+    payment_date DATE NOT NULL,
+    balance_before NUMERIC(10,3),
+    balance_after NUMERIC(10,3),
+    penalty_amount NUMERIC(10,3) DEFAULT 0,
+    notes TEXT,
+    payment_method TEXT DEFAULT 'other' CHECK (payment_method IN ('tap', 'other', 'court_collection', 'cash', 'bank_transfer')),
+    tap_charge_id TEXT,
+    legal_case_id UUID REFERENCES public.legal_cases(id) ON DELETE SET NULL,
+    legal_fee_id UUID REFERENCES public.legal_fees(id) ON DELETE SET NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Document Attachments Table
+CREATE TABLE IF NOT EXISTS public.document_attachments (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    transaction_id UUID REFERENCES public.transactions(id) ON DELETE CASCADE,
+    customer_id UUID REFERENCES public.customers(id) ON DELETE CASCADE,
+    file_name TEXT NOT NULL,
+    file_path TEXT NOT NULL,
+    file_type TEXT,
+    file_size BIGINT,
+    description TEXT,
+    bucket_name TEXT DEFAULT 'documents',
+    created_at TIMESTAMPTZ DEFAULT now() NOT NULL
+);
+
+-- =================================================================
+-- PART 5: RBAC System Tables
+-- =================================================================
+
+-- Permissions Table
+CREATE TABLE IF NOT EXISTS public.permissions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    code TEXT NOT NULL UNIQUE,
+    name TEXT NOT NULL,
+    module TEXT NOT NULL,
+    description TEXT,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- App Roles Table (Dynamic Roles)
+CREATE TABLE IF NOT EXISTS public.app_roles (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL UNIQUE,
+    description TEXT,
+    is_system_role BOOLEAN DEFAULT false,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Role Permissions Table (Many-to-Many)
+CREATE TABLE IF NOT EXISTS public.role_permissions (
+    role_id UUID REFERENCES public.app_roles(id) ON DELETE CASCADE,
+    permission_id UUID REFERENCES public.permissions(id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    PRIMARY KEY (role_id, permission_id)
+);
+
 -- Refunds Table
 CREATE TABLE IF NOT EXISTS public.refunds (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -191,7 +191,22 @@ CREATE TABLE IF NOT EXISTS public.refunds (
 );
 
 -- =================================================================
--- PART 6: Expenses & Employees Tables
+-- PART 6: Legal System - Refunds Table
+-- =================================================================
+
+-- Refunds Table (depends on customers, created after legal_fees)
+CREATE TABLE IF NOT EXISTS public.refunds (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    customer_id UUID REFERENCES public.customers(id) ON DELETE CASCADE,
+    amount NUMERIC NOT NULL,
+    reason TEXT,
+    refund_date DATE DEFAULT CURRENT_DATE,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- =================================================================
+-- PART 7: Expenses & Employees Tables
 -- =================================================================
 
 -- Expenses Table
@@ -239,7 +254,7 @@ CREATE TABLE IF NOT EXISTS public.employee_attachments (
 );
 
 -- =================================================================
--- PART 7: Other Tables
+-- PART 8: Other Tables
 -- =================================================================
 
 -- Invoices Table (Tap Payments)
@@ -279,7 +294,7 @@ CREATE TABLE IF NOT EXISTS public.user_logs (
 );
 
 -- =================================================================
--- PART 8: Helper Functions
+-- PART 9: Helper Functions
 -- =================================================================
 
 -- Update updated_at column function
@@ -423,7 +438,7 @@ END;
 $$;
 
 -- =================================================================
--- PART 9: Business Logic Functions
+-- PART 10: Business Logic Functions
 -- =================================================================
 
 -- Record Payment Function (Latest version with all features)
@@ -807,7 +822,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- =================================================================
--- PART 10: Triggers
+-- PART 11: Triggers
 -- =================================================================
 
 -- User creation trigger
@@ -887,7 +902,7 @@ AFTER INSERT OR UPDATE OR DELETE ON public.payments
 FOR EACH ROW EXECUTE FUNCTION public.audit_log_changes();
 
 -- =================================================================
--- PART 11: Indexes
+-- PART 12: Indexes
 -- =================================================================
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_legal_cases_case_number ON public.legal_cases(case_number);
@@ -895,7 +910,7 @@ CREATE INDEX IF NOT EXISTS idx_legal_cases_customer_id ON public.legal_cases(cus
 CREATE INDEX IF NOT EXISTS idx_legal_cases_transaction_id ON public.legal_cases(transaction_id);
 
 -- =================================================================
--- PART 12: Row Level Security (RLS)
+-- PART 13: Row Level Security (RLS)
 -- =================================================================
 
 -- Enable RLS on all tables
@@ -1123,7 +1138,7 @@ CREATE POLICY "Admins can see all logs" ON public.user_logs
     USING (public.has_role(auth.uid(), 'admin'));
 
 -- =================================================================
--- PART 13: Seed Permissions and Roles (Schema Data Only)
+-- PART 14: Seed Permissions and Roles (Schema Data Only)
 -- =================================================================
 
 -- Seed Permissions
@@ -1207,7 +1222,7 @@ AND p.code LIKE '%.view'
 ON CONFLICT DO NOTHING;
 
 -- =================================================================
--- PART 14: Storage Buckets
+-- PART 15: Storage Buckets
 -- =================================================================
 
 -- Create storage buckets
@@ -1263,7 +1278,7 @@ USING (
 );
 
 -- =================================================================
--- PART 15: Grant Permissions
+-- PART 16: Grant Permissions
 -- =================================================================
 
 GRANT EXECUTE ON FUNCTION public.record_payment TO authenticated;
