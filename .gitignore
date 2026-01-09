@@ -25,3 +25,8 @@ dist-ssr
 
 # Supabase temporary files
 supabase/.temp/
+
+# Environment variables
+.env
+.env.local
+.env.production
