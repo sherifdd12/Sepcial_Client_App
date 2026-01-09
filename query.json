@@ -1,0 +1,3 @@
+{
+    "query": "SELECT column_name FROM information_schema.columns WHERE table_name = 'transactions' AND table_schema = 'public' LIMIT 5"
+}

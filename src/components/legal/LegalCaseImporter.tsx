@@ -1191,311 +1191,134 @@ export const LegalCaseImporter = () => {
                                     ))
                                 )}
                             </div>
-                                                            checked={selectedHistoryIds.includes(c.id)}
-                        onCheckedChange={() => toggleHistorySelection(c.id)}
-                                                        />
-                    </TableCell>
-                    <TableCell className="align-top">
-                        <div className="space-y-1">
-                            <div className="font-bold text-gray-900">{c.customers?.full_name}</div>
-                            {c.transactions && (
-                                <Badge variant="outline" className="text-xs text-blue-600 border-blue-100 bg-blue-50">
-                                    معاملة #{c.transactions.sequence_number}
-                                </Badge>
-                            )}
-                        </div>
-                    </TableCell>
-                    <TableCell className="align-top">
-                        <div className="space-y-1">
-                            <div className="font-bold text-gray-900">{c.opponent}</div>
-                            <div className="text-sm text-gray-500 flex flex-wrap gap-2">
-                                <Badge variant="secondary" className="text-xs font-normal">{c.case_number}</Badge>
-                                <Badge variant="outline" className="text-xs font-normal">{c.automated_number || 'بدون رقم آلي'}</Badge>
-                            </div>
-                            <div className="text-xs text-gray-500 mt-1">
-                                <span className="font-semibold">الجهة:</span> {c.entity}
-                            </div>
-                        </div>
-                    </TableCell>
-                    <TableCell className="align-top">
-                        <div className="space-y-1 text-sm">
-                            <div><span className="text-gray-500">تاريخ الجلسة:</span> {c.session_date}</div>
-                            <div><span className="text-gray-500">القرار:</span> <span className="font-medium text-blue-700">{c.session_decision}</span></div>
-                        </div>
-                    </TableCell>
-                    {showCustomerStats && (
-                        <>
-                            <TableCell className="align-top">
-                                <div className="space-y-1 text-xs">
-                                    <div className="flex justify-start gap-2">
-                                        <span className="text-gray-500">عدد المعاملات:</span>
-                                        <span className="font-medium">{c.transactions_count}</span>
-                                    </div>
-                                    <div className="flex justify-start gap-2">
-                                        <span className="text-gray-500">إجمالي المديونية:</span>
-                                        <span className="font-bold text-red-600">{c.total_debt} د.ك</span>
-                                    </div>
-                                    <div className="flex justify-start gap-2">
-                                        <span className="text-gray-500">إجمالي المدفوع:</span>
-                                        <span className="font-bold text-green-600">{c.total_paid} د.ك</span>
-                                    </div>
-                                </div>
-                            </TableCell>
-                            <TableCell className="align-top">
-                                <div className="space-y-1 text-xs">
-                                    {c.last_payment_date ? (
-                                        <>
-                                            <div className="font-medium text-gray-900">{c.last_payment_date}</div>
-                                            <div className="text-blue-600 font-bold">{c.last_payment_amount} د.ك</div>
-                                        </>
-                                    ) : (
-                                        <span className="text-gray-400 italic">لا توجد دفعات</span>
-                                    )}
-                                </div>
-                            </TableCell>
-                        </>
-                    )}
-                    <TableCell className="align-top text-left">
-                        <div className="flex gap-2 justify-start">
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                                onClick={() => setEditingCase({ ...c })}
-                            >
-                                <Edit size={16} />
-                            </Button>
-                            <Button variant="ghost" size="sm" onClick={() => handleDeleteCase(c.id)} className="text-red-600 hover:text-red-700 hover:bg-red-50">
-                                <Trash2 size={16} />
-                            </Button>
-                        </div>
-                    </TableCell>
-                </TableRow>
-                                            ))}
-            </TableBody>
-        </Table>
-                                </div >
-
-    {/* Mobile Card View */ }
-    < div className = "md:hidden space-y-4 p-4 bg-gray-50" >
-    {
-        filteredHistory.map((c) => (
-            <div key={c.id} className={`bg-white rounded-xl border border-gray-200 shadow-sm p-4 space-y-4 ${selectedHistoryIds.includes(c.id) ? 'ring-2 ring-blue-500' : ''}`}>
-                <div className="flex justify-between items-start">
-                    <div className="flex items-start gap-3">
-                        <Checkbox
-                            checked={selectedHistoryIds.includes(c.id)}
-                            onCheckedChange={() => toggleHistorySelection(c.id)}
-                            className="mt-1"
-                        />
-                        <div>
-                            <h4 className="font-bold text-gray-900">{c.customers?.full_name}</h4>
-                            {c.transactions && (
-                                <Badge variant="outline" className="text-xs text-blue-600 border-blue-100 bg-blue-50 mt-1">
-                                    معاملة #{c.transactions.sequence_number}
-                                </Badge>
-                            )}
-                        </div>
-                    </div>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => setEditingCase({ ...c })}>
-                                <Edit className="mr-2 h-4 w-4" />
-                                تعديل
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDeleteCase(c.id)} className="text-red-600">
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                حذف
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
-
-                <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                        <span className="text-sm font-semibold text-gray-700">الخصم:</span>
-                        <span className="text-sm text-gray-900">{c.opponent}</span>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                        <Badge variant="secondary" className="text-xs">{c.case_number}</Badge>
-                        {c.automated_number && <Badge variant="outline" className="text-xs">{c.automated_number}</Badge>}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                        <span className="font-semibold">الجهة:</span> {c.entity}
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 text-sm bg-gray-50 p-3 rounded-lg">
-                    <div>
-                        <span className="text-gray-500 text-xs block">تاريخ الجلسة</span>
-                        <span className="font-medium">{c.session_date}</span>
-                    </div>
-                    <div>
-                        <span className="text-gray-500 text-xs block">القرار</span>
-                        <span className="font-medium text-blue-700">{c.session_decision}</span>
-                    </div>
-                </div>
-
-                {showCustomerStats && (
-                    <div className="border-t pt-3 mt-3 space-y-2">
-                        <h5 className="text-xs font-bold text-gray-500 mb-2">إحصائيات العميل</h5>
-                        <div className="grid grid-cols-2 gap-2 text-xs">
-                            <div className="flex justify-between">
-                                <span className="text-gray-500">المعاملات:</span>
-                                <span className="font-medium">{c.transactions_count}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-500">المديونية:</span>
-                                <span className="font-bold text-red-600">{c.total_debt}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-500">المدفوع:</span>
-                                <span className="font-bold text-green-600">{c.total_paid}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-500">آخر دفعة:</span>
-                                <span>{c.last_payment_amount ? `${c.last_payment_amount}` : '-'}</span>
-                            </div>
-                        </div>
-                    </div>
-                )}
-            </div>
-        ))
-    }
-                                </div >
-                            </div >
                         ) : (
-    <div className="text-center py-20 bg-white rounded-xl border border-gray-100 shadow-sm">
-        <Search className="mx-auto text-gray-300 mb-4" size={48} />
-        <h3 className="text-xl font-bold text-gray-900 mb-2">لا توجد نتائج</h3>
-        <p className="text-gray-500">لم يتم العثور على أي قضايا تطابق بحثك.</p>
-    </div>
-)}
-                    </div >
-                </TabsContent >
-    <TabsContent value="legal-fees">
-        <LegalFeeManager />
-    </TabsContent>
-            </Tabs >
+                            <div className="text-center py-20 bg-white rounded-xl border border-gray-100 shadow-sm">
+                                <Search className="mx-auto text-gray-300 mb-4" size={48} />
+                                <h3 className="text-xl font-bold text-gray-900 mb-2">لا توجد نتائج</h3>
+                                <p className="text-gray-500">لم يتم العثور على أي قضايا تطابق بحثك.</p>
+                            </div>
+                        )}
+                    </div>
+                </TabsContent>
 
-    {/* Edit/Add Case Dialog */ }
-    < Dialog open = {!!editingCase} onOpenChange = {(open) => {
-    if (!open) {
-        setEditingCase(null);
-        setIsAddingCase(false);
-    }
-}}>
-    <DialogContent className="max-w-2xl" dir="rtl">
-        <DialogHeader>
-            <DialogTitle className="text-right">
-                {isAddingCase ? "إضافة قضية جديدة" : "تعديل بيانات القضية"}
-            </DialogTitle>
-            <DialogDescription className="text-right">
-                أدخل تفاصيل القضية القانونية أدناه.
-            </DialogDescription>
-        </DialogHeader>
-        <div className="grid grid-cols-2 gap-4 py-4">
-            {isAddingCase && (
-                <div className="col-span-2 space-y-2">
-                    <Label>العميل</Label>
-                    <Select
-                        value={editingCase?.customer_id}
-                        onValueChange={(val) => setEditingCase({ ...editingCase, customer_id: val })}
-                    >
-                        <SelectTrigger className="text-right">
-                            <SelectValue placeholder="اختر العميل" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {customers?.map((c) => (
-                                <SelectItem key={c.id} value={c.id}>
-                                    {c.full_name} ({c.sequence_number})
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-            )}
-            <div className="space-y-2">
-                <Label htmlFor="opponent">الخصم</Label>
-                <Input
-                    id="opponent"
-                    value={editingCase?.opponent || ""}
-                    onChange={(e) => setEditingCase({ ...editingCase, opponent: e.target.value })}
-                />
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="case_number">رقم القضية</Label>
-                <Input
-                    id="case_number"
-                    value={editingCase?.case_number || ""}
-                    onChange={(e) => setEditingCase({ ...editingCase, case_number: e.target.value })}
-                />
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="automated_number">الرقم الآلي</Label>
-                <Input
-                    id="automated_number"
-                    value={editingCase?.automated_number || ""}
-                    onChange={(e) => setEditingCase({ ...editingCase, automated_number: e.target.value })}
-                />
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="entity">الجهة</Label>
-                <Input
-                    id="entity"
-                    value={editingCase?.entity || ""}
-                    onChange={(e) => setEditingCase({ ...editingCase, entity: e.target.value })}
-                />
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="session_date">تاريخ الجلسة</Label>
-                <Input
-                    id="session_date"
-                    value={editingCase?.session_date || ""}
-                    onChange={(e) => setEditingCase({ ...editingCase, session_date: e.target.value })}
-                />
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="next_session_date">الجلسة القادمة</Label>
-                <Input
-                    id="next_session_date"
-                    value={editingCase?.next_session_date || ""}
-                    onChange={(e) => setEditingCase({ ...editingCase, next_session_date: e.target.value })}
-                />
-            </div>
-            <div className="col-span-2 space-y-2">
-                <Label htmlFor="session_decision">قرار الجلسة</Label>
-                <Input
-                    id="session_decision"
-                    value={editingCase?.session_decision || ""}
-                    onChange={(e) => setEditingCase({ ...editingCase, session_decision: e.target.value })}
-                />
-            </div>
-            <div className="col-span-2 space-y-2">
-                <Label htmlFor="notes">ملاحظات</Label>
-                <Input
-                    id="notes"
-                    value={editingCase?.notes || ""}
-                    onChange={(e) => setEditingCase({ ...editingCase, notes: e.target.value })}
-                />
-            </div>
-        </div>
-        <DialogFooter className="flex gap-2 justify-start">
-            <Button onClick={handleEditSave} disabled={editMutation.isPending || addMutation.isPending}>
-                {(editMutation.isPending || addMutation.isPending) ? <Loader2 className="animate-spin mr-2" size={16} /> : <Save size={16} className="mr-2" />}
-                {isAddingCase ? "إضافة القضية" : "حفظ التعديلات"}
-            </Button>
-            <Button variant="outline" onClick={() => {
-                setEditingCase(null);
-                setIsAddingCase(false);
-            }}>إلغاء</Button>
-        </DialogFooter>
-    </DialogContent>
+                <TabsContent value="legal-fees">
+                    <LegalFeeManager />
+                </TabsContent>
+            </Tabs>
+
+            {/* Edit/Add Case Dialog */}
+            <Dialog open={!!editingCase} onOpenChange={(open) => {
+                if (!open) {
+                    setEditingCase(null);
+                    setIsAddingCase(false);
+                }
+            }}>
+                <DialogContent className="max-w-2xl" dir="rtl">
+                    <DialogHeader>
+                        <DialogTitle className="text-right">
+                            {isAddingCase ? "إضافة قضية جديدة" : "تعديل بيانات القضية"}
+                        </DialogTitle>
+                        <DialogDescription className="text-right">
+                            أدخل تفاصيل القضية القانونية أدناه.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid grid-cols-2 gap-4 py-4">
+                        {isAddingCase && (
+                            <div className="col-span-2 space-y-2">
+                                <Label>العميل</Label>
+                                <Select
+                                    value={editingCase?.customer_id}
+                                    onValueChange={(val) => setEditingCase({ ...editingCase, customer_id: val })}
+                                >
+                                    <SelectTrigger className="text-right">
+                                        <SelectValue placeholder="اختر العميل" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {customers?.map((c) => (
+                                            <SelectItem key={c.id} value={c.id}>
+                                                {c.full_name} ({c.sequence_number})
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
+                        <div className="space-y-2">
+                            <Label htmlFor="opponent">الخصم</Label>
+                            <Input
+                                id="opponent"
+                                value={editingCase?.opponent || ""}
+                                onChange={(e) => setEditingCase({ ...editingCase, opponent: e.target.value })}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="case_number">رقم القضية</Label>
+                            <Input
+                                id="case_number"
+                                value={editingCase?.case_number || ""}
+                                onChange={(e) => setEditingCase({ ...editingCase, case_number: e.target.value })}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="automated_number">الرقم الآلي</Label>
+                            <Input
+                                id="automated_number"
+                                value={editingCase?.automated_number || ""}
+                                onChange={(e) => setEditingCase({ ...editingCase, automated_number: e.target.value })}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="entity">الجهة</Label>
+                            <Input
+                                id="entity"
+                                value={editingCase?.entity || ""}
+                                onChange={(e) => setEditingCase({ ...editingCase, entity: e.target.value })}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="session_date">تاريخ الجلسة</Label>
+                            <Input
+                                id="session_date"
+                                value={editingCase?.session_date || ""}
+                                onChange={(e) => setEditingCase({ ...editingCase, session_date: e.target.value })}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="next_session_date">الجلسة القادمة</Label>
+                            <Input
+                                id="next_session_date"
+                                value={editingCase?.next_session_date || ""}
+                                onChange={(e) => setEditingCase({ ...editingCase, next_session_date: e.target.value })}
+                            />
+                        </div>
+                        <div className="col-span-2 space-y-2">
+                            <Label htmlFor="session_decision">قرار الجلسة</Label>
+                            <Input
+                                id="session_decision"
+                                value={editingCase?.session_decision || ""}
+                                onChange={(e) => setEditingCase({ ...editingCase, session_decision: e.target.value })}
+                            />
+                        </div>
+                        <div className="col-span-2 space-y-2">
+                            <Label htmlFor="notes">ملاحظات</Label>
+                            <Input
+                                id="notes"
+                                value={editingCase?.notes || ""}
+                                onChange={(e) => setEditingCase({ ...editingCase, notes: e.target.value })}
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter className="flex gap-2 justify-start">
+                        <Button onClick={handleEditSave} disabled={editMutation.isPending || addMutation.isPending}>
+                            {(editMutation.isPending || addMutation.isPending) ? <Loader2 className="animate-spin mr-2" size={16} /> : <Save size={16} className="mr-2" />}
+                            {isAddingCase ? "إضافة القضية" : "حفظ التعديلات"}
+                        </Button>
+                        <Button variant="outline" onClick={() => {
+                            setEditingCase(null);
+                            setIsAddingCase(false);
+                        }}>إلغاء</Button>
+                    </DialogFooter>
+                </DialogContent>
             </Dialog >
         </div >
     );
