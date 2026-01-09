@@ -704,7 +704,23 @@ BEGIN
          (SELECT COALESCE(SUM(amount), 0) FROM public.refunds WHERE refund_date::date BETWEEN filter_start_date AND filter_end_date)) AS total_revenue,
         (SELECT COALESCE(SUM(amount - cost_price), 0) FROM public.transactions WHERE created_at::date BETWEEN filter_start_date AND filter_end_date) AS total_profit,
         ((SELECT COALESCE(SUM(amount), 0) FROM public.transactions WHERE created_at::date <= filter_end_date) + (SELECT COALESCE(SUM(amount), 0) FROM public.legal_fees WHERE status = 'active' AND created_at::date <= filter_end_date) - (SELECT COALESCE(SUM(amount), 0) FROM public.payments WHERE payment_date::date <= filter_end_date) + (SELECT COALESCE(SUM(amount), 0) FROM public.refunds WHERE refund_date::date <= filter_end_date)) AS total_outstanding,
-        (SELECT COALESCE(SUM(overdue_amount), 0) FROM public.transactions WHERE (status = 'overdue' OR (remaining_balance > 0 AND start_date <= filter_end_date)) AND created_at::date <= filter_end_date) AS total_overdue,
+        (
+            SELECT COALESCE(SUM(
+                CASE 
+                    WHEN remaining_balance <= 0 THEN 0
+                    ELSE 
+                        GREATEST(0, 
+                            (LEAST(
+                                (EXTRACT(YEAR FROM filter_end_date) - EXTRACT(YEAR FROM start_date)) * 12 + 
+                                (EXTRACT(MONTH FROM filter_end_date) - EXTRACT(MONTH FROM start_date)) + 1,
+                                number_of_installments
+                            ) * installment_amount) - (amount - remaining_balance)
+                        )
+                END
+            ), 0)
+            FROM public.transactions 
+            WHERE created_at::date <= filter_end_date AND remaining_balance > 0 AND has_legal_case = false
+        ) AS total_overdue,
         (SELECT COUNT(*) FROM public.transactions WHERE status = 'overdue' AND created_at::date <= filter_end_date) AS overdue_transactions,
         (SELECT COALESCE(SUM(amount), 0) FROM public.payments WHERE payment_method = 'tap' AND payment_date::date BETWEEN filter_start_date AND filter_end_date) AS tap_revenue,
         (SELECT COALESCE(SUM(amount), 0) FROM public.payments WHERE payment_method = 'court_collection' AND payment_date::date BETWEEN filter_start_date AND filter_end_date) AS court_revenue,
@@ -729,8 +745,8 @@ DECLARE
     months_passed INT;
     paid_installments INT;
     expected_paid_installments INT;
-    overdue_installments INT;
-    overdue_amount REAL;
+    v_overdue_installments INT;
+    v_overdue_amount REAL;
 BEGIN
     IF NOT public.is_authorized_user(auth.uid()) THEN
         RAISE EXCEPTION 'User is not authorized to check overdue transactions.';
@@ -745,13 +761,13 @@ BEGIN
         IF months_passed >= 0 THEN
             paid_installments := floor((t.amount - t.remaining_balance) / t.installment_amount);
             expected_paid_installments := months_passed + 1;
-            overdue_installments := expected_paid_installments - paid_installments;
+            v_overdue_installments := expected_paid_installments - paid_installments;
 
-            IF overdue_installments > 0 THEN
-                overdue_amount := overdue_installments * t.installment_amount;
-                IF t.overdue_installments != overdue_installments OR t.overdue_amount != overdue_amount THEN
+            IF v_overdue_installments > 0 THEN
+                v_overdue_amount := v_overdue_installments * t.installment_amount;
+                IF t.overdue_installments != v_overdue_installments OR t.overdue_amount != v_overdue_amount THEN
                     UPDATE public.transactions
-                    SET overdue_installments = overdue_installments, overdue_amount = overdue_amount, status = 'overdue'
+                    SET overdue_installments = v_overdue_installments, overdue_amount = v_overdue_amount, status = 'overdue'
                     WHERE id = t.id;
                     updates := updates + 1;
                 END IF;
