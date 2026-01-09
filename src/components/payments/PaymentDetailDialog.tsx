@@ -23,8 +23,8 @@ const PaymentDetailDialog = ({ payment, open, onOpenChange }: PaymentDetailDialo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-[500px] p-0 overflow-hidden max-h-[90vh] flex flex-col border-none bg-transparent shadow-none">
-        <div className="overflow-y-auto flex-1">
+      <DialogContent className="w-[95vw] max-w-[500px] p-0 overflow-hidden max-h-[90vh]">
+        <div className="overflow-y-auto max-h-[90vh]">
           <Card className="border-none shadow-lg overflow-hidden">
             <DialogHeader className="p-6 pb-2 bg-primary/5">
               <DialogTitle className="text-xl flex items-center gap-2">

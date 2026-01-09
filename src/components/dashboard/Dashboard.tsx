@@ -58,8 +58,8 @@ const Dashboard = () => {
   // Filter state
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth() + 1;
-  const [selectedYear, setSelectedYear] = useState<string>(currentYear.toString());
-  const [selectedMonth, setSelectedMonth] = useState<string>(currentMonth.toString());
+  const [selectedYear, setSelectedYear] = useState<string>("0");
+  const [selectedMonth, setSelectedMonth] = useState<string>("0");
 
   const { data: stats, isLoading, error, refetch } = useQuery<DashboardStats>({
     queryKey: ['dashboardStats', selectedYear, selectedMonth],
