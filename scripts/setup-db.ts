@@ -1,9 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
-  'https://odeqbnntvogchzipniig.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kZXFibm50dm9nY2h6aXBuaWlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY5Mjc5OTgsImV4cCI6MjA3MjUwMzk5OH0.phWW0hNm-ujEEsngjhf88us4suJv9boQ_9uh7ADhTXQ'
+  'https://tmvenumncumdmnupeglt.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRtdmVudW1uY3VtZG1udXBlZ2x0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5NTc4NTYsImV4cCI6MjA4MzUzMzg1Nn0.WBGxy0LRJ8YRK1RDUFCKJVzNyQkNWvRKE8Olnpslics'
 );
+
 
 // Function to create tables
 const createTables = async () => {
