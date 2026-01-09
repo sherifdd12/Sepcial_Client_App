@@ -126,27 +126,42 @@ export const validateAndPrepareTransactionRow = async (
     rowErrors.push('عدد الدفعات يجب أن يكون أكبر من صفر');
   }
 
-  // Parse date
-  let start_date: Date;
-  try {
-    const dateValue = row[mapping.start_date];
-    if (!dateValue) {
-      start_date = new Date();
-    } else {
-      const excelDate = Number(dateValue);
-      if (!isNaN(excelDate)) {
-        start_date = new Date(Math.round((excelDate - 25569) * 86400 * 1000) + 43200000);
-      } else {
-        start_date = new Date(dateValue);
-      }
+  // Robust date parsing helper
+  const parseDate = (value: any): Date => {
+    if (!value) return new Date();
 
-      if (isNaN(start_date.getTime())) {
-        start_date = new Date();
-      }
+    // Handle Excel numeric dates
+    const excelDate = Number(value);
+    if (!isNaN(excelDate) && excelDate > 25569) { // 25569 is 1970-01-01
+      return new Date(Math.round((excelDate - 25569) * 86400 * 1000) + 43200000);
     }
-  } catch (e) {
-    start_date = new Date();
-  }
+
+    const dateStr = String(value).trim();
+
+    // Handle DD/MM/YYYY or DD-MM-YYYY
+    const ddmmyyyy = /^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/.exec(dateStr);
+    if (ddmmyyyy) {
+      const day = parseInt(ddmmyyyy[1], 10);
+      const month = parseInt(ddmmyyyy[2], 10) - 1;
+      const year = parseInt(ddmmyyyy[3], 10);
+      return new Date(year, month, day);
+    }
+
+    // Handle YYYY/MM/DD or YYYY-MM-DD
+    const yyyymmdd = /^(\d{4})[/-](\d{1,2})[/-](\d{1,2})$/.exec(dateStr);
+    if (yyyymmdd) {
+      const year = parseInt(yyyymmdd[1], 10);
+      const month = parseInt(yyyymmdd[2], 10) - 1;
+      const day = parseInt(yyyymmdd[3], 10);
+      return new Date(year, month, day);
+    }
+
+    const parsed = new Date(dateStr);
+    return isNaN(parsed.getTime()) ? new Date() : parsed;
+  };
+
+  // Parse date
+  const start_date = parseDate(row[mapping.start_date]);
 
   // Check sequence number
   let sequenceNumber = '';
@@ -173,14 +188,14 @@ export const validateAndPrepareTransactionRow = async (
     extra_price,
     amount: total_amount,
     installment_amount,
-    start_date: start_date!.toISOString(),
+    start_date: start_date.toISOString(),
     number_of_installments,
     remaining_balance: total_amount,
     status: 'active',
     has_legal_case: false,
     notes: mapping.notes ? row[mapping.notes]?.toString() || '' : undefined,
     created_at: (mapping.created_at && row[mapping.created_at])
-      ? new Date(row[mapping.created_at] as string).toISOString()
+      ? parseDate(row[mapping.created_at]).toISOString()
       : start_date.toISOString()
   };
 
@@ -232,8 +247,30 @@ export const importSingleTransactionRow = async (row: any, mapping: any) => {
 
   if (legacy && (legacy.image || legacy.pdf)) {
     const attachments = [];
-    if (legacy.image) attachments.push({ transaction_id: savedTransaction.id, file_path: legacy.image, file_url: legacy.image, file_name: 'Legacy Image', file_type: 'image', created_at: new Date().toISOString() });
-    if (legacy.pdf) attachments.push({ transaction_id: savedTransaction.id, file_path: legacy.pdf, file_url: legacy.pdf, file_name: 'Legacy PDF', file_type: 'application/pdf', created_at: new Date().toISOString() });
+    if (legacy.image) {
+      attachments.push({
+        transaction_id: savedTransaction.id,
+        customer_id: validRow.customer_id,
+        file_path: legacy.image,
+        file_url: legacy.image,
+        file_name: 'Legacy Image',
+        file_type: 'image',
+        file_size: 0,
+        created_at: new Date().toISOString()
+      });
+    }
+    if (legacy.pdf) {
+      attachments.push({
+        transaction_id: savedTransaction.id,
+        customer_id: validRow.customer_id,
+        file_path: legacy.pdf,
+        file_url: legacy.pdf,
+        file_name: 'Legacy PDF',
+        file_type: 'application/pdf',
+        file_size: 0,
+        created_at: new Date().toISOString()
+      });
+    }
     if (attachments.length > 0) await supabase.from('document_attachments').insert(attachments);
   }
 
@@ -311,8 +348,30 @@ export const importTransactions = async (
 
           if (legacy && (legacy.image || legacy.pdf)) {
             const attachments = [];
-            if (legacy.image) attachments.push({ transaction_id: savedTransaction.id, file_path: legacy.image, file_url: legacy.image, file_name: 'Legacy Image', file_type: 'image', created_at: new Date().toISOString() });
-            if (legacy.pdf) attachments.push({ transaction_id: savedTransaction.id, file_path: legacy.pdf, file_url: legacy.pdf, file_name: 'Legacy PDF', file_type: 'application/pdf', created_at: new Date().toISOString() });
+            if (legacy.image) {
+              attachments.push({
+                transaction_id: savedTransaction.id,
+                customer_id: validRow.customer_id,
+                file_path: legacy.image,
+                file_url: legacy.image,
+                file_name: 'Legacy Image',
+                file_type: 'image',
+                file_size: 0,
+                created_at: new Date().toISOString()
+              });
+            }
+            if (legacy.pdf) {
+              attachments.push({
+                transaction_id: savedTransaction.id,
+                customer_id: validRow.customer_id,
+                file_path: legacy.pdf,
+                file_url: legacy.pdf,
+                file_name: 'Legacy PDF',
+                file_type: 'application/pdf',
+                file_size: 0,
+                created_at: new Date().toISOString()
+              });
+            }
             if (attachments.length > 0) await supabase.from('document_attachments').insert(attachments);
           }
         }
