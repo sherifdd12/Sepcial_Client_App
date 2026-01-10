@@ -37,6 +37,7 @@ import OverdueTrackingPage from "./pages/OverdueTrackingPage";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 import ExpensesPage from "./pages/ExpensesPage";
 import EmployeesPage from "./pages/EmployeesPage";
+import CustomerServicePage from "@/pages/CustomerServicePage";
 import { PaymentNotificationListener } from "@/components/shared/PaymentNotificationListener";
 import { PermissionGuard } from "@/components/auth/PermissionGuard";
 
@@ -116,6 +117,11 @@ const App = () => (
                 <Route path="/employees" element={
                   <PermissionGuard permission="employees.view" fallback={<Navigate to="/access-denied" />}>
                     <EmployeesPage />
+                  </PermissionGuard>
+                } />
+                <Route path="/customer-service" element={
+                  <PermissionGuard permission="customers.view" fallback={<Navigate to="/access-denied" />}>
+                    <CustomerServicePage />
                   </PermissionGuard>
                 } />
                 <Route element={<AdminLayout />}>

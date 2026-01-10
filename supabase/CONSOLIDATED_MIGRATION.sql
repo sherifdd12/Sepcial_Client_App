@@ -1259,4 +1259,45 @@ BEGIN
     END IF;
 END $$;
 
+-- Customer Service Chat Feature
+-- 1. Drop the existing table and its policies to start fresh
+DROP TABLE IF EXISTS public.customer_service_logs CASCADE;
+
+-- 2. Create the table with correct relationships
+CREATE TABLE public.customer_service_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    customer_id UUID NOT NULL REFERENCES public.customers(id) ON DELETE CASCADE,
+    employee_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    message TEXT NOT NULL,
+    sender_type TEXT NOT NULL CHECK (sender_type IN ('employee', 'customer')),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 3. Enable Security
+ALTER TABLE public.customer_service_logs ENABLE ROW LEVEL SECURITY;
+
+-- 4. Create Indexes for performance
+CREATE INDEX idx_customer_service_logs_customer_id ON public.customer_service_logs(customer_id);
+CREATE INDEX idx_customer_service_logs_created_at ON public.customer_service_logs(created_at);
+
+-- 5. Create Security Policies
+CREATE POLICY "Enable read access for authenticated users" ON public.customer_service_logs
+    FOR SELECT TO authenticated USING (true);
+
+CREATE POLICY "Enable insert access for authenticated users" ON public.customer_service_logs
+    FOR INSERT TO authenticated WITH CHECK (auth.uid() = employee_id);
+
+-- 6. Enable Realtime updates
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_publication_tables 
+        WHERE pubname = 'supabase_realtime' 
+        AND schemaname = 'public' 
+        AND tablename = 'customer_service_logs'
+    ) THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.customer_service_logs;
+    END IF;
+END $$;
+
 COMMIT;

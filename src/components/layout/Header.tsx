@@ -31,7 +31,8 @@ import {
   Gavel,
   Wallet,
   Shield,
-  Briefcase
+  Briefcase,
+  MessageSquare
 } from "lucide-react";
 import {
   Sheet,
@@ -166,6 +167,7 @@ const Header = () => {
     { to: "/customers", icon: Users, label: "العملاء", badge: 0, permission: "customers.view" },
     { to: "/transactions", icon: Receipt, label: "المعاملات", badge: 0, permission: "transactions.view" },
     { to: "/payments", icon: DollarSign, label: "الدفعات", badge: 0, permission: "payments.view" },
+    { to: "/customer-service", icon: MessageSquare, label: "خدمة العملاء", badge: 0, permission: "customers.view" },
 
     // More Menu Items
     { to: "/overdue-tracking", icon: AlertTriangle, label: "المتأخرين", badge: 0, permission: "reports.view" },
