@@ -91,35 +91,35 @@ const PaymentsPage = () => {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-foreground">المدفوعات</h1>
+                    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">المدفوعات</h1>
                     <div className="flex items-center gap-2 text-muted-foreground">
-                        <p>عرض وإدارة كافة المدفوعات المسجلة</p>
+                        <p className="text-sm sm:text-base">عرض وإدارة كافة المدفوعات المسجلة</p>
                         {startDate && (
-                            <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">
+                            <span className="text-[10px] sm:text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full whitespace-nowrap">
                                 (آخر سنة)
                             </span>
                         )}
                     </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                     {startDate && (
                         <Button
                             variant="outline"
                             onClick={() => setStartDate(null)}
-                            className="flex items-center space-x-reverse space-x-2"
+                            className="flex-1 sm:flex-none flex items-center justify-center space-x-reverse space-x-2 h-10 px-3"
                         >
-                            <span>تحميل الكل</span>
+                            <span className="text-sm">تحميل الكل</span>
                         </Button>
                     )}
                     <Button
                         onClick={() => setIsNewPaymentFormOpen(true)}
-                        className="flex items-center space-x-reverse space-x-2"
+                        className="flex-1 sm:flex-none flex items-center justify-center space-x-reverse space-x-2 h-10 px-3 bg-primary hover:bg-primary/90"
                         disabled={isReadOnly}
                     >
                         <Plus className="h-4 w-4" />
-                        <span>إضافة دفعة جديدة</span>
+                        <span className="text-sm whitespace-nowrap">إضافة دفعة جديدة</span>
                     </Button>
                 </div>
             </div>
