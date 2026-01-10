@@ -341,7 +341,7 @@ const Header = () => {
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[280px] sm:w-[320px] p-0">
+              <SheetContent side="right" className="w-[280px] sm:w-[320px] p-0 flex flex-col h-full">
                 <SheetHeader className="text-right p-4 pb-4 border-b border-border">
                   <SheetTitle className="flex items-center space-x-reverse space-x-3">
                     <img
@@ -374,7 +374,7 @@ const Header = () => {
                   </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto">
+                <div className="flex-1 overflow-y-auto min-h-0">
                   <nav className="flex flex-col space-y-1 p-3">
                     {filteredNavItems.map((item) => (
                       <NavItem
@@ -387,7 +387,7 @@ const Header = () => {
                   </nav>
                 </div>
 
-                <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border bg-background">
+                <div className="p-4 border-t border-border bg-background mt-auto">
                   <Button
                     onClick={() => { handleSignOut(); setMobileMenuOpen(false); }}
                     variant="destructive"

@@ -100,7 +100,7 @@ const CustomerDetailDialog = ({ customer, open, onOpenChange }: CustomerDetailDi
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[95vw] sm:max-w-4xl p-0 overflow-hidden max-h-[90vh] flex flex-col">
-        <div className="overflow-y-auto p-4 sm:p-6 max-h-[90vh]">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
           <DialogHeader>
             <DialogTitle className="text-2xl flex items-center gap-2">
               <User className="h-6 w-6" />
