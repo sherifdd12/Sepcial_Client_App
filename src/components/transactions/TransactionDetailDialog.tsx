@@ -135,7 +135,7 @@ const TransactionDetailDialog = ({ transaction, open, onOpenChange }: Transactio
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-4xl p-0 overflow-hidden max-h-[90vh] right-0 mx-auto">
+      <DialogContent className="w-[95vw] sm:max-w-4xl p-0 overflow-hidden max-h-[90vh]">
         <div className="overflow-y-auto p-4 sm:p-6 max-h-[90vh]">
           <DialogHeader>
             <DialogTitle className="text-2xl flex items-center gap-2">

@@ -88,7 +88,7 @@ const TransactionForm = ({ transaction, customers, onSave, onCancel, isLoading, 
     // Convert dates to ISO string for Supabase
     const dataToSave = {
       ...formData,
-      start_date: formData.start_date.toISOString().split('T')[0],
+      start_date: format(formData.start_date, 'yyyy-MM-dd'),
       amount: totalAmount,
       // Set initial remaining balance to amount since no payments yet
       remaining_balance: totalAmount,
