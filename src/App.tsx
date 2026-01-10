@@ -38,6 +38,7 @@ import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 import ExpensesPage from "./pages/ExpensesPage";
 import EmployeesPage from "./pages/EmployeesPage";
 import CustomerServicePage from "@/pages/CustomerServicePage";
+import TasksPage from "@/pages/TasksPage";
 import { PaymentNotificationListener } from "@/components/shared/PaymentNotificationListener";
 import { PermissionGuard } from "@/components/auth/PermissionGuard";
 
@@ -122,6 +123,11 @@ const App = () => (
                 <Route path="/customer-service" element={
                   <PermissionGuard permission="customers.view" fallback={<Navigate to="/access-denied" />}>
                     <CustomerServicePage />
+                  </PermissionGuard>
+                } />
+                <Route path="/tasks" element={
+                  <PermissionGuard permission="dashboard.view" fallback={<Navigate to="/access-denied" />}>
+                    <TasksPage />
                   </PermissionGuard>
                 } />
                 <Route element={<AdminLayout />}>

@@ -51,6 +51,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import NotificationCenter from "@/components/tasks/NotificationCenter";
 
 const NavItem = ({ item, onClick, isMobile = false }: { item: any, onClick?: () => void, isMobile?: boolean }) => {
   const Icon = item.icon;
@@ -167,6 +168,7 @@ const Header = () => {
     { to: "/customers", icon: Users, label: "العملاء", badge: 0, permission: "customers.view" },
     { to: "/transactions", icon: Receipt, label: "المعاملات", badge: 0, permission: "transactions.view" },
     { to: "/payments", icon: DollarSign, label: "الدفعات", badge: 0, permission: "payments.view" },
+    { to: "/tasks", icon: Clock, label: "المهام", badge: 0, permission: "dashboard.view" },
     { to: "/customer-service", icon: MessageSquare, label: "خدمة العملاء", badge: 0, permission: "customers.view" },
 
     // More Menu Items
@@ -330,6 +332,8 @@ const Header = () => {
               <LogOut className="h-4 w-4 ml-2" />
               <span className="hidden xl:inline">خروج</span>
             </Button>
+
+            <NotificationCenter />
 
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>

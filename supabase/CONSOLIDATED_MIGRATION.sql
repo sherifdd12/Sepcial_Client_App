@@ -1300,4 +1300,102 @@ BEGIN
     END IF;
 END $$;
 
+-- Employee Tasks Feature
+-- 1. Create employee_tasks table
+CREATE TABLE IF NOT EXISTS public.employee_tasks (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    title TEXT NOT NULL,
+    description TEXT,
+    created_by UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    assigned_to UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+    status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'completed', 'snoozed')),
+    due_at TIMESTAMPTZ,
+    snoozed_until TIMESTAMPTZ,
+    customer_id UUID REFERENCES public.customers(id) ON DELETE SET NULL,
+    transaction_id UUID REFERENCES public.transactions(id) ON DELETE SET NULL,
+    legal_case_id UUID REFERENCES public.legal_cases(id) ON DELETE SET NULL,
+    completion_notes TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 2. Create task_attachments table
+CREATE TABLE IF NOT EXISTS public.task_attachments (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    task_id UUID NOT NULL REFERENCES public.employee_tasks(id) ON DELETE CASCADE,
+    file_path TEXT NOT NULL,
+    file_name TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 3. Create notifications table
+CREATE TABLE IF NOT EXISTS public.notifications (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    title TEXT NOT NULL,
+    message TEXT NOT NULL,
+    type TEXT NOT NULL,
+    related_id UUID,
+    is_read BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 4. Enable RLS
+ALTER TABLE public.employee_tasks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.task_attachments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
+
+-- 5. Policies
+DROP POLICY IF EXISTS "Users can see tasks assigned to them or created by them" ON public.employee_tasks;
+CREATE POLICY "Users can see tasks assigned to them or created by them" ON public.employee_tasks FOR SELECT TO authenticated USING (auth.uid() = created_by OR auth.uid() = assigned_to OR public.has_role(auth.uid(), 'admin'));
+DROP POLICY IF EXISTS "Users can create tasks" ON public.employee_tasks;
+CREATE POLICY "Users can create tasks" ON public.employee_tasks FOR INSERT TO authenticated WITH CHECK (auth.uid() = created_by);
+DROP POLICY IF EXISTS "Users can update tasks assigned to them or created by them" ON public.employee_tasks;
+CREATE POLICY "Users can update tasks assigned to them or created by them" ON public.employee_tasks FOR UPDATE TO authenticated USING (auth.uid() = created_by OR auth.uid() = assigned_to OR public.has_role(auth.uid(), 'admin'));
+
+DROP POLICY IF EXISTS "Users can see their own notifications" ON public.notifications;
+CREATE POLICY "Users can see their own notifications" ON public.notifications FOR SELECT TO authenticated USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users can update their own notifications" ON public.notifications;
+CREATE POLICY "Users can update their own notifications" ON public.notifications FOR UPDATE TO authenticated USING (auth.uid() = user_id);
+
+-- 6. Trigger for notifications
+CREATE OR REPLACE FUNCTION public.handle_task_assignment()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF (TG_OP = 'INSERT' AND NEW.assigned_to IS NOT NULL) OR 
+       (TG_OP = 'UPDATE' AND NEW.assigned_to IS NOT NULL AND (OLD.assigned_to IS NULL OR OLD.assigned_to != NEW.assigned_to)) THEN
+        IF NEW.assigned_to != NEW.created_by THEN
+            INSERT INTO public.notifications (user_id, title, message, type, related_id)
+            VALUES (NEW.assigned_to, 'مهمة جديدة', 'تم تعيين مهمة جديدة لك: ' || NEW.title, 'task_assigned', NEW.id);
+        END IF;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_task_assigned ON public.employee_tasks;
+CREATE TRIGGER on_task_assigned AFTER INSERT OR UPDATE ON public.employee_tasks FOR EACH ROW EXECUTE FUNCTION public.handle_task_assignment();
+
+-- 7. Add to realtime
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'employee_tasks') THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.employee_tasks;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'notifications') THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.notifications;
+    END IF;
+END $$;
+
+-- 8. Storage Bucket for Task Attachments
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('task-attachments', 'task-attachments', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Storage Policies for Task Attachments
+DROP POLICY IF EXISTS "Allow authenticated users to upload to task-attachments" ON storage.objects;
+CREATE POLICY "Allow authenticated users to upload to task-attachments" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = 'task-attachments');
+DROP POLICY IF EXISTS "Allow authenticated users to view task-attachments" ON storage.objects;
+CREATE POLICY "Allow authenticated users to view task-attachments" ON storage.objects FOR SELECT TO authenticated USING (bucket_id = 'task-attachments');
+
 COMMIT;
