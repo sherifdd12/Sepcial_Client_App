@@ -118,6 +118,7 @@ const TransactionDetailDialog = ({ transaction, open, onOpenChange }: Transactio
   if (!transaction) return null;
 
   const totalPaid = payments?.reduce((sum, p) => sum + (Number(p.amount) || 0), 0) || 0;
+  const calculatedRemainingBalance = transaction.amount - totalPaid;
   const progressPercentage = transaction.amount > 0 ? (totalPaid / transaction.amount) * 100 : 0;
 
   const getStatusBadge = () => {
@@ -249,14 +250,14 @@ const TransactionDetailDialog = ({ transaction, open, onOpenChange }: Transactio
                   </div>
                   <div>
                     <div className="text-sm text-muted-foreground mb-1">المبلغ المتبقي</div>
-                    {transaction.remaining_balance < 0 ? (
+                    {calculatedRemainingBalance < 0 ? (
                       <div className="text-2xl font-bold text-green-600 flex items-center gap-2">
-                        {formatCurrency(transaction.remaining_balance)}
+                        {formatCurrency(calculatedRemainingBalance)}
                         <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-base">دفع غرامة</span>
                       </div>
                     ) : (
                       <div className="text-2xl font-bold text-red-600">
-                        {formatCurrency(transaction.remaining_balance)}
+                        {formatCurrency(calculatedRemainingBalance)}
                       </div>
                     )}
                   </div>

@@ -41,8 +41,12 @@ import CustomerServicePage from "@/pages/CustomerServicePage";
 import TasksPage from "@/pages/TasksPage";
 import { PaymentNotificationListener } from "@/components/shared/PaymentNotificationListener";
 import { PermissionGuard } from "@/components/auth/PermissionGuard";
+import { initializePushNotifications } from "@/services/pushNotificationService";
 
 import AccessDenied from "@/pages/AccessDenied";
+
+// Initialize push notifications when app loads
+initializePushNotifications();
 
 const queryClient = new QueryClient();
 

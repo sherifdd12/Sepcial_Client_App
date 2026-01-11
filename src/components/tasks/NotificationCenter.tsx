@@ -11,17 +11,39 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Bell, BellDot, Check, Trash2, Clock } from "lucide-react";
+import { Bell, BellDot, Check, Trash2, Clock, BellRing } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { formatArabicDate } from "@/lib/utils-arabic";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import {
+    isNotificationSupported,
+    getNotificationPermission,
+    requestNotificationPermission,
+    showNotification
+} from "@/services/pushNotificationService";
 
 const NotificationCenter = () => {
     const { session } = useAuth();
     const queryClient = useQueryClient();
     const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
+    const [pushPermission, setPushPermission] = useState<NotificationPermission | 'unsupported'>('default');
+
+    // Check push permission on mount
+    useEffect(() => {
+        setPushPermission(getNotificationPermission());
+    }, []);
+
+    const handleEnablePush = async () => {
+        const permission = await requestNotificationPermission();
+        setPushPermission(permission);
+        if (permission === 'granted') {
+            toast.success('تم تفعيل إشعارات المتصفح بنجاح!');
+        } else if (permission === 'denied') {
+            toast.error('تم رفض إذن الإشعارات. يمكنك تغييره من إعدادات المتصفح.');
+        }
+    };
 
     // Fetch notifications
     const { data: notifications, isLoading } = useQuery({
@@ -55,14 +77,14 @@ const NotificationCenter = () => {
                     table: "notifications",
                     filter: `user_id=eq.${session.user.id}`,
                 },
-                (payload) => {
+                async (payload) => {
                     queryClient.invalidateQueries({ queryKey: ["notifications"] });
 
                     // Play sound
                     const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3");
                     audio.play().catch(() => { });
 
-                    // Show toast
+                    // Show in-app toast
                     toast.info(payload.new.title, {
                         description: payload.new.message,
                         action: {
@@ -72,6 +94,14 @@ const NotificationCenter = () => {
                                 markAsReadMutation.mutate(payload.new.id);
                             },
                         },
+                    });
+
+                    // Show browser push notification
+                    await showNotification({
+                        title: payload.new.title,
+                        body: payload.new.message,
+                        url: payload.new.type.startsWith("task") ? "/tasks" : "/",
+                        tag: `notification-${payload.new.id}`
                     });
                 }
             )
@@ -188,7 +218,18 @@ const NotificationCenter = () => {
                     )}
                 </ScrollArea>
                 <DropdownMenuSeparator className="m-0" />
-                <div className="p-2">
+                <div className="p-2 space-y-1">
+                    {isNotificationSupported() && pushPermission !== 'granted' && (
+                        <Button
+                            variant="outline"
+                            className="w-full text-xs h-8 gap-2"
+                            onClick={handleEnablePush}
+                            disabled={pushPermission === 'denied'}
+                        >
+                            <BellRing className="h-3 w-3" />
+                            {pushPermission === 'denied' ? 'الإشعارات مرفوضة' : 'تفعيل إشعارات المتصفح'}
+                        </Button>
+                    )}
                     <Button variant="ghost" className="w-full text-xs h-8" onClick={() => navigate("/tasks")}>
                         عرض كل المهام
                     </Button>
