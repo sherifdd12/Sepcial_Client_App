@@ -142,6 +142,7 @@ export interface DashboardStats {
   other_revenue?: number;
   total_legal_fees?: number;
   total_expenses?: number;
+  total_customer_receivables?: number;
 }
 
 export interface Refund {

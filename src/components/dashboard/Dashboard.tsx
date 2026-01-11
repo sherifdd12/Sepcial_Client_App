@@ -139,7 +139,8 @@ const Dashboard = () => {
       'إجمالي الإيرادات': stats?.total_revenue || 0,
       'إجمالي الأرباح': stats?.total_profit || 0,
       'المبالغ المستحقة': stats?.total_outstanding || 0,
-      'إجمالي المصروفات': stats?.total_expenses || 0
+      'إجمالي المصروفات': stats?.total_expenses || 0,
+      'مستحقات العملاء': stats?.total_customer_receivables || 0
     },
   ];
 
@@ -181,16 +182,16 @@ const Dashboard = () => {
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight text-foreground">لوحة التحكم</h2>
-          <p className="text-muted-foreground">{appSettings?.app_description || "نظرة شاملة على أعمالك المالية"}</p>
+        <div className="text-center md:text-right">
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">لوحة التحكم</h2>
+          <p className="text-sm md:text-base text-muted-foreground">{appSettings?.app_description || "نظرة شاملة على أعمالك المالية"}</p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-2 bg-card border rounded-lg px-3 py-1 shadow-sm">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+        <div className="flex flex-wrap items-center justify-center md:justify-end gap-2">
+          <div className="flex items-center gap-1 bg-card border rounded-lg px-2 py-1 shadow-sm overflow-x-auto max-w-full">
+            <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
             <Select value={selectedYear} onValueChange={setSelectedYear}>
-              <SelectTrigger className="w-[100px] border-none shadow-none focus:ring-0 h-8">
+              <SelectTrigger className="w-[90px] md:w-[100px] border-none shadow-none focus:ring-0 h-8 text-xs md:text-sm">
                 <SelectValue placeholder="السنة" />
               </SelectTrigger>
               <SelectContent>
@@ -200,9 +201,9 @@ const Dashboard = () => {
                 ))}
               </SelectContent>
             </Select>
-            <div className="h-4 w-[1px] bg-border mx-1" />
+            <div className="h-4 w-[1px] bg-border mx-1 shrink-0" />
             <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-              <SelectTrigger className="w-[110px] border-none shadow-none focus:ring-0 h-8">
+              <SelectTrigger className="w-[100px] md:w-[110px] border-none shadow-none focus:ring-0 h-8 text-xs md:text-sm">
                 <SelectValue placeholder="الشهر" />
               </SelectTrigger>
               <SelectContent>
@@ -213,7 +214,7 @@ const Dashboard = () => {
             </Select>
           </div>
 
-          <Button onClick={() => overdueMutation.mutate()} disabled={overdueMutation.isPending} variant="outline">
+          <Button onClick={() => overdueMutation.mutate()} disabled={overdueMutation.isPending} variant="outline" size="sm" className="h-10 md:h-9">
             <RefreshCw className={`ml-2 h-4 w-4 ${overdueMutation.isPending ? 'animate-spin' : ''}`} />
             {overdueMutation.isPending ? 'جاري الفحص...' : 'فحص المتأخرات'}
           </Button>
@@ -251,6 +252,7 @@ const Dashboard = () => {
             <StatsCard title="المتأخرات" value={stats.total_overdue} icon={AlertTriangle} variant="danger" isCurrency />
             <StatsCard title="أتعاب قانونية" value={stats.total_legal_fees || 0} icon={Gavel} variant="default" isCurrency />
             <StatsCard title="إجمالي المصروفات" value={stats.total_expenses || 0} icon={Wallet} variant="danger" isCurrency />
+            <StatsCard title="مستحقات العملاء" value={stats.total_customer_receivables || 0} icon={RefreshCcw} variant="info" isCurrency />
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
