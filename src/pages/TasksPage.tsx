@@ -16,12 +16,14 @@ import {
     Edit,
     Trash2,
     Paperclip,
-    ExternalLink
+    ExternalLink,
+    Eye
 } from "lucide-react";
 import { formatArabicDate } from "@/lib/utils-arabic";
 import { toast } from "@/hooks/use-toast";
 import TaskDialog from "@/components/tasks/TaskDialog";
 import TaskActionDialog from "@/components/tasks/TaskActionDialog";
+import TaskDetailDialog from "@/components/tasks/TaskDetailDialog";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -35,11 +37,11 @@ const TasksPage = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [statusFilter, setStatusFilter] = useState<string>("all");
 
-    // Dialog states
     const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
     const [selectedTask, setSelectedTask] = useState<any>(null);
     const [actionType, setActionType] = useState<"snooze" | "close">("close");
     const [isActionDialogOpen, setIsActionDialogOpen] = useState(false);
+    const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
 
     // Fetch tasks
     const { data: tasks, isLoading } = useQuery({
@@ -134,6 +136,11 @@ const TasksPage = () => {
     const handleEdit = (task: any) => {
         setSelectedTask(task);
         setIsTaskDialogOpen(true);
+    };
+
+    const handleViewDetails = (task: any) => {
+        setSelectedTask(task);
+        setIsDetailDialogOpen(true);
     };
 
     const handleAction = (task: any, type: "snooze" | "close") => {
@@ -238,6 +245,10 @@ const TasksPage = () => {
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => handleViewDetails(task)}>
+                                        <Eye className="h-4 w-4 ml-2" />
+                                        عرض التفاصيل
+                                    </DropdownMenuItem>
                                     <DropdownMenuItem onClick={() => handleEdit(task)}>
                                         <Edit className="h-4 w-4 ml-2" />
                                         تعديل
@@ -343,6 +354,12 @@ const TasksPage = () => {
                 onOpenChange={setIsActionDialogOpen}
                 task={selectedTask}
                 action={actionType}
+            />
+
+            <TaskDetailDialog
+                open={isDetailDialogOpen}
+                onOpenChange={setIsDetailDialogOpen}
+                task={selectedTask}
             />
         </div>
     );
