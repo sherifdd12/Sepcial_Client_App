@@ -206,7 +206,7 @@ const CustomerDetailDialog = ({ customer, open, onOpenChange }: CustomerDetailDi
                         onClick={() => setRefundDialogOpen(true)}
                         className="mt-2 sm:mt-3 text-[10px] sm:text-xs bg-blue-600 text-white px-3 py-1 sm:px-4 sm:py-1.5 rounded-full font-bold hover:bg-blue-700 transition-all shadow-sm"
                       >
-                        إرجاع مبلغ
+                        إدارة المستحقات
                       </button>
                     )}
                   </div>

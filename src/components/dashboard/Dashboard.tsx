@@ -1,6 +1,6 @@
 import { handleDatabaseError } from "@/lib/errorHandling";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Users, Receipt, DollarSign, AlertTriangle, TrendingUp, RefreshCw, Sparkles, Lightbulb, ShieldCheck, Building2, CreditCard, Calendar, AlertCircle, Gavel, Wallet } from "lucide-react";
+import { Users, Receipt, DollarSign, AlertTriangle, TrendingUp, RefreshCw, Sparkles, Lightbulb, ShieldCheck, Building2, CreditCard, Calendar, AlertCircle, Gavel, Wallet, RefreshCcw } from "lucide-react";
 import AIInsights from "./AIInsights";
 import StatsCard from "./StatsCard";
 import { DashboardStats } from "@/lib/types";
@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 import { formatCurrency } from "@/lib/utils-arabic";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import ExcessBalanceListDialog from "./ExcessBalanceListDialog";
 
 // --- Supabase API Functions ---
 const getDashboardStats = async (year: number, month: number): Promise<DashboardStats> => {
@@ -60,6 +61,7 @@ const Dashboard = () => {
   const currentMonth = new Date().getMonth() + 1;
   const [selectedYear, setSelectedYear] = useState<string>("0");
   const [selectedMonth, setSelectedMonth] = useState<string>("0");
+  const [isExcessListOpen, setIsExcessListOpen] = useState(false);
 
   const { data: stats, isLoading, error, refetch } = useQuery<DashboardStats>({
     queryKey: ['dashboardStats', selectedYear, selectedMonth],
@@ -218,6 +220,11 @@ const Dashboard = () => {
             <RefreshCw className={`ml-2 h-4 w-4 ${overdueMutation.isPending ? 'animate-spin' : ''}`} />
             {overdueMutation.isPending ? 'جاري الفحص...' : 'فحص المتأخرات'}
           </Button>
+
+          <Button onClick={() => setIsExcessListOpen(true)} variant="default" size="sm" className="h-10 md:h-9 bg-blue-600 hover:bg-blue-700">
+            <Wallet className="ml-2 h-4 w-4" />
+            فحص الأرصدة الزائدة
+          </Button>
         </div>
       </div>
 
@@ -252,7 +259,8 @@ const Dashboard = () => {
             <StatsCard title="المتأخرات" value={stats.total_overdue} icon={AlertTriangle} variant="danger" isCurrency />
             <StatsCard title="أتعاب قانونية" value={stats.total_legal_fees || 0} icon={Gavel} variant="default" isCurrency />
             <StatsCard title="إجمالي المصروفات" value={stats.total_expenses || 0} icon={Wallet} variant="danger" isCurrency />
-            <StatsCard title="مستحقات العملاء" value={stats.total_customer_receivables || 0} icon={RefreshCcw} variant="info" isCurrency />
+            <StatsCard title="مستحقات العملاء" value={stats.total_customer_receivables || 0} icon={RefreshCw} variant="success" isCurrency />
+            <StatsCard title="إجمالي المسترد" value={stats.total_refunds || 0} icon={RefreshCcw} variant="warning" isCurrency />
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
@@ -399,6 +407,7 @@ const Dashboard = () => {
           </div>
         </>
       )}
+      <ExcessBalanceListDialog open={isExcessListOpen} onOpenChange={setIsExcessListOpen} />
     </div>
   );
 };
